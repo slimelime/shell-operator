@@ -1,0 +1,33 @@
+---
+version: "2.3"
+
+x-base: &python
+  build: .
+  volumes:
+    - ".:/app"
+  environment:
+    CONFIG: /app/examples/simple.yaml
+
+services:
+  sh:
+    <<: *python
+    entrypoint:
+      - sh
+
+  test:
+    <<: *python
+    entrypoint:
+      - python
+      - -m
+      - unittest
+      - discover
+    command:
+      - tests
+
+  app:
+    <<: *python
+    volumes:
+      - ".:/app"
+      - "$HOME/.kube:/root/.kube"
+    entrypoint:
+      - ./shell-operator

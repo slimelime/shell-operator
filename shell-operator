@@ -1,0 +1,48 @@
+#! /usr/local/bin/python
+
+import os
+import yaml
+import kubernetes as k
+
+import voluptuous as v
+import concurrent.futures as f
+
+from shelloperator import watcher
+from shelloperator import commander
+from shelloperator import executor
+
+
+def get_config(file_path):
+    return yaml.load(open(file_path, 'r'))
+
+
+def validate_config(config):
+    schema = v.Schema({
+        v.Required('watch'): [{
+            v.Required('path'): str,
+            v.Required('command'): str,
+            v.Required('updateObject', default=False): bool,
+            v.Required('concurrency', default=1): int,
+        }],
+        'boot': {
+            'command': str,
+        }
+    })
+
+    return schema(config)
+
+
+
+def main():
+    config = validate_config(get_config(os.environ['CONFIG']))
+
+    print(config)
+
+    k.config.load_kube_config()
+    client = k.config.new_client_from_config()
+
+    watcher.setup_watches(client, config['watch'])
+
+
+if __name__ == '__main__':
+    main()

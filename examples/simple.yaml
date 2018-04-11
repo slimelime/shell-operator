@@ -1,0 +1,16 @@
+---
+# Watch for namespace objects and say hello when one is changed
+watch:
+  - path: "/api/v1/pods"
+    command: "/bin/echo Hello!"
+    updateObject: false
+    concurrency: 4
+  - path: "/api/v1/namespaces"
+    command: "/bin/echo Hello!"
+    updateObject: false
+  - path: "/api/v1/services"
+    command: "/bin/echo Hello!"
+    updateObject: false
+  - path: "/api/v1/ingresses"
+    command: "/bin/echo Hello!"
+    updateObject: false

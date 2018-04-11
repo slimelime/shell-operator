@@ -16,8 +16,9 @@ To use this operator you create a new project with a Dockerfile like the followi
 ```dockerfile
 FROM myobplatform/shell-operator:latest
 # Install any dependencies you want
+# The base images uses alpine, so something like 'apk add -U curl'
 COPY shell-conf.yaml /app/
-CMD ["shell-operator", "--config", "/app/shell-conf.yaml"]
+ENV CONFIG /app/shell-conf.yaml
 ```
 
 Where the `shell-conf.yaml` mentioned above is something like:
@@ -28,17 +29,20 @@ boot:
   # this command is run on boot and is useful for upserting your CRD creation object
   # or any other prep work to be done once when any new pod comes up.
   command: kubectl apply -f /app/mycrd.yaml
+  # The shell to use for the command, this defaults to the default shell
+  # but can be overriden
+  shell: "/bin/bash"
+  # Set env vars to be available in the shell
+  # This way you can set dependency address etc
+  # as per a normal 12 factor app
+  environment:
+    DB_URL: "xxx"
 
-# set how many workers the operator should use
-# there may be a need to serialise everything because of race conditions so this can be set to 1
-# or you might want multiple crds to be updated at the same time so
-# want to have 10 or more workers
-# This option is here to constrain the operator to the resources you want to use.
-concurrency: 1
+
 
 watch:
     # The fully qualified object name that you want to watch
-  - object: my.domain.com/MyCustomObject
+  - path: /apis/my.objects.com/the-object
     # The command to run - the operator will execute this in a subshell with the default shell
     # it will pipe the CRD being updated as a JSON object to stdin.
     command: python myscript.py
@@ -50,10 +54,16 @@ watch:
     # stderr as the error message.
     # If this is set to false then the operator will fire and forget - this might be useful
     # for non critical tasks that do not update the CRD
-    updateCrd: true
+    updateObject: true
     # The shell to use for the command, this defaults to the default shell
     # but can be overriden
     shell: "/bin/bash"
+    # set how many workers the watch should use
+    # there may be a need to serialise everything because of race conditions so this can be set to 1
+    # or you might want multiple crds to be updated at the same time so
+    # want to have 10 or more workers
+    # This option is here to constrain the operator to the resources you want to use.
+    concurrency: 1
     # Set env vars to be available in the shell
     # This way you can set dependency address etc
     # as per a normal 12 factor app
@@ -63,11 +73,11 @@ watch:
 
 ### CRD input
 
-As above, the stdin data that a script will recieve is the following:
+As above, the stdin data that a script will receive is the following:
 
 ```json
 {
-  "event": "added",
+  "event": "ADDED",
   "object": {
 
   },
@@ -76,6 +86,6 @@ As above, the stdin data that a script will recieve is the following:
 ```
 
 Where:
-- event: one of added, updated or deleted
+- event: one of ADDED, MODIFIED or DELETED
 - object: is the CRD object from Kubernetes this event relates to
 - ts: the unix millisecond timestamp this event occured
