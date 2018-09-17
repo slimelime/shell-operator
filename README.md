@@ -55,16 +55,6 @@ watch:
     # The command to run - the operator will execute this in a subshell with the default shell
     # it will pipe the Object being updated as a JSON object to stdin.
     command: python myscript.py
-    # if this is true the operator will read stderr of the shell and use that to continuosly
-    # update the Object's status as it is running.
-    # On exit of the subshell if it is a 0 exit code it will expect a json object to have been sent
-    # on stdout and will update the CRD's 'status' key with that object.
-    # If there is a non 0 exit code it will set the CRD's 'status' as errored and use the last line of
-    # stderr as the error message.
-    # If this is set to false then the operator will fire and forget - this might be useful
-    # for non critical tasks that do not update the Object or for non CRDs that cannot be updated
-    # This MUST be false for a non CRD object
-    updateObject: true
     # set how many workers the operator should use
     # there may be a need to serialise everything because of race conditions so this can be set to 1
     # or you might want multiple crds to be updated at the same time so
@@ -83,19 +73,10 @@ watch:
 
 ### CRD input
 
-As above, the stdin data that a script will recieve is the following:
+The operator will expose environment variables into the shell environment when the script is run to allow the script to identify the namespace and name of the object that has changed. The values are:
 
-```json
-{
-  "event": "ADDED",
-  "object": {
+* SHOP_OBJECT_NAMESPACE
+* SHOP_OBJECT_NAME
+* Any other variables you have listed in the `environment` key of the YAML config for that watch (see example above).
 
-  },
-  "ts": 123126423743
-}
-```
-
-Where:
-- event: one of ADDED, MODIFIED or DELETED
-- object: is the Object from Kubernetes this event relates to, look at the API server path to see what it might look like for your intended Object
-- ts: the unix millisecond timestamp this event occured
+You can reference these environment variables in your script and use a Kubernetes API call or kubectl to get information on the object that has changed or is being reconciled.
