@@ -17,6 +17,7 @@ type ShellConfig struct {
 	Watch []struct {
 		ApiVersion  string            `yaml:"apiVersion"`
 		Kind        string            `yaml:"kind"`
+		Command     string            `yaml:"command"`
 		Concurrency int               `yaml:"concurrency"`
 		Environment map[string]string `yaml:"environment`
 	} `yaml:"watch"`

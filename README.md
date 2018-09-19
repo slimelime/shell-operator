@@ -13,19 +13,27 @@ The usecase of this operator is for Kubernetes Cluster Administrators to be able
 
 ## How it works
 
-To use this operator you create a new project with a Dockerfile like the following:
+To use this operator you create a new project with a Dockerfile that contains everything you need for your operator use. All you need to do is also add in a release binary of shell-operator and add it to the path inside the docker image. Then you can set it as the entrypoint and point it at the yaml config (see below) and you are good to go!
 
 ```dockerfile
-FROM myobplatform/shell-operator:latest
-# Install any dependencies you want including binaries
-# The base image is build from alpine, so use `apk add -U ...`
+# Use any docker base image you want
+FROM mybaseimage:v1
 
-# Add in your own code/scripts that you want executed
+# Install any dependencies you want including binaries
+# Curl will be needed for steps below
+
+# Add a linux binary for shell operator
+ENV SHOP_VERSION 0.1.0
+RUN curl -LO
+
+# Optionally add in your own code/scripts that you want executed on reconcile of k8s objects
+COPY /mycode/* /app/
 
 # see below for config file structure
 COPY shell-conf.yaml /app/
-# tell the shell operator where you config file is
-ENV SHELL_CONFIG /app/shell-config.yaml
+
+# Run shell-operator specifying the config location
+ENTRYPOINT [/usr/bin/shell-operator, --config=/app/shell-conf.yaml]
 ```
 
 You can also set your config in a Kubernetes Config Map and volume it in to reduce how often you have to change your docker image.
