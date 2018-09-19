@@ -1,0 +1,23 @@
+---
+version: '2.3'
+
+services:
+  go: &base
+    build:
+      context: .
+      target: test
+    volumes:
+      - ".:/app"
+      - "$HOME/.kube:/root/.kube"
+    entrypoint: [go]
+
+  sh:
+    <<: *base
+    entrypoint: [sh]
+
+  test:
+    <<: *base
+    command:
+      - "test"
+      - "./..."
+      - "-v"

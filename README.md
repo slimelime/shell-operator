@@ -80,3 +80,7 @@ The operator will expose environment variables into the shell environment when t
 * Any other variables you have listed in the `environment` key of the YAML config for that watch (see example above).
 
 You can reference these environment variables in your script and use a Kubernetes API call or kubectl to get information on the object that has changed or is being reconciled.
+
+## Development
+
+The repo is enabled with docker and docker-compose. To run tests execute `docker-compose run test`.
