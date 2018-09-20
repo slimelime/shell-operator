@@ -1,7 +1,6 @@
 module github.com/MYOB-Technology/shell-operator
 
 require (
-	github.com/MYOB-Technology/ops-kube-db-operator v0.0.0-20180704060912-27c990087695
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v0.0.0-20180629235805-9fb12b3b21c5 // indirect
@@ -37,7 +36,7 @@ require (
 	k8s.io/api v0.0.0-20180913155108-f456898a08e4
 	k8s.io/apiextensions-apiserver v0.0.0-20180913001544-d65f4428c04f // indirect
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
-	k8s.io/client-go v2.0.0-alpha.0.0.20180821074022-f2f85107cac6+incompatible
+	k8s.io/client-go v8.0.0+incompatible
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 	k8s.io/kubernetes v1.11.4-beta.0.0.20180914221536-ed4cd2884880
 	sigs.k8s.io/controller-runtime v0.1.3

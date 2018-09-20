@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/MYOB-Technology/shell-operator.svg?branch=master)](https://travis-ci.org/MYOB-Technology/shell-operator)
+
 # Kubernetes Shell Operator
 
 This operator is a generic operator that can watch any Kubernetes Object that you specify and will just execute a shell command in a subshell on any change to that Object.
@@ -47,7 +49,6 @@ boot:
   # this command is run on boot and is useful for upserting your CRD creation object
   # or any other prep work to be done once when any new pod comes up.
   command: kubectl apply -f /app/mycrd.yaml
-  shell: "/bin/bash"
   # Set env vars to be available in the shell
   # This way you can set environment specific items
   # as per a normal 12 factor app
@@ -56,10 +57,11 @@ boot:
 
 # `watch` is a required key and is an array of watches
 watch:
-    # The fully qualified API path to a List endpoint
-    # This allows you to specify any Kubernetes Objects including native ones such as
-    # Pods, Namespaces etc.
-  - apiUrl: /apis/my.domain.com/v1/MyCustomObject
+    # The api group and version for the object you want to watch.
+  - apiVersion: my.domain.io/v1beta1
+    # The kind, these are the values that are in a yaml manifest representation of an object of this
+    # type, so you can get the values from that.
+    kind: MyObject
     # The command to run - the operator will execute this in a subshell with the default shell
     # it will pipe the Object being updated as a JSON object to stdin.
     command: python myscript.py
@@ -69,9 +71,6 @@ watch:
     # want to have 10 or more workers
     # This option is here to constrain the operator to the resources you want to use.
     concurrency: 1
-    # The shell to use for the command, this defaults to the default shell
-    # but can be overriden
-    shell: "/bin/bash"
     # Set env vars to be available in the shell
     # This way you can set environment specific items
     # as per a normal 12 factor app
