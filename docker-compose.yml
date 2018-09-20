@@ -21,3 +21,4 @@ services:
       - "test"
       - "./..."
       - "-v"
+      - "-mod=readonly"
