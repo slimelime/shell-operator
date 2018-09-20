@@ -2,7 +2,7 @@
 watch:
   - apiVersion: v1
     kind: Pod
-    command: echo Pod $SHOP_OBJECT_NAME
+    command: echo Pod $SHOP_OBJECT_NAME > /app/a_test_file
     concurrency: 3
   - apiVersion: extensions/v1beta1
     kind: Deployment
