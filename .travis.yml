@@ -1,0 +1,21 @@
+---
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+services:
+  - docker
+
+before_install:
+  - docker-compose build test
+
+script:
+  - docker-compose run --rm test
+
+after_success:
+  - if [ -n "$TRAVIS_TAG" ]; then
+    echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin;
+    docker build -t myobplatform/shell-operator:$TRAVIS_TAG .;
+    docker push myobplatform/shell-operator:$TRAVIS_TAG;
+    fi
