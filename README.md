@@ -15,32 +15,13 @@ The usecase of this operator is for Kubernetes Cluster Administrators to be able
 
 ## How it works
 
-To use this operator you create a new project with a Dockerfile that contains everything you need for your operator use. All you need to do is also add in a release binary of shell-operator and add it to the path inside the docker image. Then you can set it as the entrypoint and point it at the yaml config (see below) and you are good to go!
-
-```dockerfile
-# Use any docker base image you want
-FROM mybaseimage:v1
-
-# Install any dependencies you want including binaries
-# Curl will be needed for steps below
-
-# Add a linux binary for shell operator
-ENV SHOP_VERSION 0.1.0
-RUN curl -LO
-
-# Optionally add in your own code/scripts that you want executed on reconcile of k8s objects
-COPY /mycode/* /app/
-
-# see below for config file structure
-COPY shell-conf.yaml /app/
-
-# Run shell-operator specifying the config location
-ENTRYPOINT [/usr/bin/shell-operator, --config=/app/shell-conf.yaml]
-```
+To use this operator you create a new project with a Dockerfile that contains everything you need for your operator use. Just add the Shell Operator Docker image as a separate multistage `FROM` image and copy it into your Dockerfile. See [example/Dockerfile](example/Dockerfile) for an example.
 
 You can also set your config in a Kubernetes Config Map and volume it in to reduce how often you have to change your docker image.
 
-Where the `shell-conf.yaml` mentioned above is something like:
+### Configuration
+
+The Shell Operator can be configured by creating a YAML configuration and copying it into your Docker image for it to pick up.
 
 ```yaml
 ---
