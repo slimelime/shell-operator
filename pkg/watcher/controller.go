@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
+	"github.com/golang/glog"
 )
 
 const (
@@ -20,17 +21,23 @@ type ShellReconciler struct {
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+	glog.V(4).Infof("Received reconcile request for %s/%s.", req.Namespace, req.Name)
+
+	glog.V(4).Infof("Setting up shell command %s for %s/%s...", s.Command, req.Namespace, req.Name)
 	cmd := executor.SetupShellCommand(s.Command, map[string]string{
 		NameEnvVarKey:      req.Name,
 		NamespaceEnvVarKey: req.Namespace,
 	})
 
+	glog.V(4).Infof("Running command %s...", s.Command)
 	_, err := cmd.CombinedOutput()
 
 	if err != nil {
+		glog.V(4).Infof("Command %s failed: %s.", s.Command, err.Error())
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	glog.V(4).Infof("Command %s successful.", s.Command)
 	return reconcile.Result{Requeue: false}, nil
 }
 
@@ -39,6 +46,8 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 // for every item that comes through.
 func SetupWatches(mgr manager.Manager, shellConfig *ShellConfig) error {
 	for _, watch := range shellConfig.Watch {
+		glog.V(1).Infof("Setting up watch for %s/%s", watch.ApiVersion, watch.Kind)
+
 		c, err := controller.New("shell-controller", mgr,
 			controller.Options{
 				MaxConcurrentReconciles: watch.Concurrency,

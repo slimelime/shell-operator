@@ -19,4 +19,6 @@ after_success:
     echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin;
     docker build -t myobplatform/shell-operator:$TRAVIS_TAG .;
     docker push myobplatform/shell-operator:$TRAVIS_TAG;
+    docker build -t myobplatform/shell-operator:latest .;
+    docker push myobplatform/shell-operator:latest;
     fi
