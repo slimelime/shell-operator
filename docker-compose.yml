@@ -5,11 +5,15 @@ services:
   go: &base
     build:
       context: .
-      target: test
+      target: base
     volumes:
-      - ".:/app"
+      - ".:/go/src/github.com/MYOB-Technology/shell-operator"
       - "$HOME/.kube:/root/.kube"
     entrypoint: [go]
+
+  dep:
+    <<: *base
+    entrypoint: [dep]
 
   sh:
     <<: *base
@@ -21,4 +25,3 @@ services:
       - "test"
       - "./..."
       - "-v"
-      - "-mod=readonly"

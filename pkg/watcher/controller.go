@@ -1,21 +1,17 @@
-package main
+package watcher
 
 import (
-	"strings"
-	"os"
-	"os/exec"
-	"log"
-	"fmt"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
+
+	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 )
 
 const (
-	NameEnvVarKey = "SHOP_OBJECT_NAME"
+	NameEnvVarKey      = "SHOP_OBJECT_NAME"
 	NamespaceEnvVarKey = "SHOP_OBJECT_NAMESPACE"
 )
 
@@ -24,25 +20,18 @@ type ShellReconciler struct {
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
-	if err := runCommandForReconcile(s.Command, req.Name, req.Namespace); err != nil {
-		log.Println("Error", err)
+	cmd := executor.SetupShellCommand(s.Command, map[string]string{
+		NameEnvVarKey:      req.Name,
+		NamespaceEnvVarKey: req.Namespace,
+	})
+
+	_, err := cmd.CombinedOutput()
+
+	if err != nil {
 		return reconcile.Result{Requeue: true}, nil
 	}
 
 	return reconcile.Result{Requeue: false}, nil
-}
-
-func runCommandForReconcile(shellCommand, name, namespace string) error {
-	cmds := strings.Split(shellCommand, " ")
-	cmd := exec.Command(cmds[0], cmds[1:]...)
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("%s=%s", NameEnvVarKey, name),
-		fmt.Sprintf("%s=%s", NamespaceEnvVarKey, namespace),
-	)
-	out, err := cmd.CombinedOutput()
-
-	log.Println("output:", string(out))
-	return err
 }
 
 // SetupWatches takes the kubebuilder manager and will setup a kubebuilder controller for
@@ -69,7 +58,7 @@ func SetupWatches(mgr manager.Manager, shellConfig *ShellConfig) error {
 			return err
 		}
 
-		c.Watch(&source.Kind{Type: do}, &handler.EnqueueRequestForObject{},)
+		c.Watch(&source.Kind{Type: do}, &handler.EnqueueRequestForObject{})
 	}
 
 	return nil

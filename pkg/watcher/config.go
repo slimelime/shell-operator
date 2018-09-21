@@ -1,18 +1,18 @@
-package main
+package watcher
 
 import (
 	"io"
 	"io/ioutil"
 
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // ShellConfig represents the YAML config file that is used with this app.
 type ShellConfig struct {
-	Boot struct {
+	Boot []struct {
 		Command     string            `yaml:"command"`
 		Environment map[string]string `yaml:"environment`
-	} `yaml:"boot,omitempty"`
+	} `yaml:"boot"`
 
 	Watch []struct {
 		ApiVersion  string            `yaml:"apiVersion"`

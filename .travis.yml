@@ -9,6 +9,7 @@ services:
 
 before_install:
   - docker-compose build test
+  - docker-compose run --rm dep ensure -v
 
 script:
   - docker-compose run --rm test
