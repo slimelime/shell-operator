@@ -27,14 +27,14 @@ The Shell Operator can be configured by creating a YAML configuration and copyin
 ---
 # `boot` is optional
 boot:
-  # this command is run on boot and is useful for upserting your CRD creation object
-  # or any other prep work to be done once when any new pod comes up.
-  command: kubectl apply -f /app/mycrd.yaml
-  # Set env vars to be available in the shell
-  # This way you can set environment specific items
-  # as per a normal 12 factor app
-  environment:
-    DB_URL: "xxx"
+    # this command is run on boot and is useful for upserting your CRD creation object
+    # or any other prep work to be done once when any new pod comes up.
+  - command: kubectl apply -f /app/mycrd.yaml
+    # Set env vars to be available in the shell
+    # This way you can set environment specific items
+    # as per a normal 12 factor app
+    environment:
+      DB_URL: "xxx"
 
 # `watch` is a required key and is an array of watches
 watch:

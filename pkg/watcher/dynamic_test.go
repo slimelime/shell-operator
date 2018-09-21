@@ -26,7 +26,6 @@ func TestCreatingDynamicCRD(t *testing.T) {
 	if typeName != "DynamicObject" {
 		t.Error("Unexpected struct type returned", typeName)
 	}
-
 }
 
 func TestCreatingDynamick8sObj(t *testing.T) {

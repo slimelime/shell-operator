@@ -7,6 +7,13 @@ import (
 
 func TestValidConfig(t *testing.T) {
 	conf := `
+boot:
+  - command: echo boot1
+  - command: echo boot2
+    environment:
+      A: b
+      C: d
+
 watch:
   - apiVersion: v1
     kind: Pod

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -48,6 +49,19 @@ func main() {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Run any boot commands
+	for _, b := range shellConfig.Boot {
+		cmd := executor.SetupShellCommand(b.Command, b.Environment)
+		log.Println("Executing boot command:")
+		out, err := cmd.CombinedOutput()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(out)
 	}
 
 	// Start the Cmd
