@@ -1,9 +1,11 @@
 ---
+boot:
+  - command: echo welcome!
 watch:
   - apiVersion: v1
     kind: Pod
-    command: echo Pod $SHOP_OBJECT_NAME > /app/a_test_file
-    concurrency: 3
+    command: echo Pod $SHOP_OBJECT_NAME
+    concurrency: 5
   - apiVersion: extensions/v1beta1
     kind: Deployment
     command: echo Deployment $SHOP_OBJECT_NAME
@@ -11,4 +13,4 @@ watch:
   - apiVersion: v1
     kind: Event
     command: echo Event $SHOP_OBJECT_NAME
-    concurrency: 1
+    concurrency: 10
