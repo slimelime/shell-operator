@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
@@ -56,7 +58,9 @@ func main() {
 
 	// Run any boot commands
 	for _, b := range shellConfig.Boot {
-		cmd := executor.SetupShellCommand(b.Command, b.Environment)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(b.Timeout)*time.Second)
+		defer cancel()
+		cmd := executor.SetupShellCommand(ctx, b.Command, b.Environment)
 		glog.V(1).Infof("Executing boot command:")
 		out, err := cmd.CombinedOutput()
 

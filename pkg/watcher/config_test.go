@@ -9,6 +9,7 @@ func TestValidConfig(t *testing.T) {
 	conf := `
 boot:
   - command: echo boot1
+    timeout: 45
   - command: echo boot2
     environment:
       A: b
@@ -18,6 +19,7 @@ watch:
   - apiVersion: v1
     kind: Pod
     command: "echo hello"
+    timeout: 120
     concurrency: 1
   - apiVersion: extensions/v1beta1
     kind: Deployment

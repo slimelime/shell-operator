@@ -2,13 +2,14 @@ package watcher
 
 import (
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 func TestReconcilerRunsShellCmd(t *testing.T) {
-	recon := ShellReconciler{Command: "bash -c echo $SHOP_OBJECT_NAME $SHOP_OBJECT_NAMESPACE > /tmp/shop-test1"}
+	recon := ShellReconciler{Command: "bash -c echo $SHOP_OBJECT_NAME $SHOP_OBJECT_NAMESPACE > /tmp/shop-test1", Timeout: time.Duration(1)}
 	req := reconcile.Request{types.NamespacedName{Name: "test-object", Namespace: "ns1"}}
 
 	res, err := recon.Reconcile(req)
@@ -23,7 +24,7 @@ func TestReconcilerRunsShellCmd(t *testing.T) {
 }
 
 func TestReconcilerFailedShellCommand(t *testing.T) {
-	recon := ShellReconciler{Command: "exit 1"}
+	recon := ShellReconciler{Command: "exit 1", Timeout: time.Duration(1)}
 	req := reconcile.Request{types.NamespacedName{Name: "test-object", Namespace: "ns1"}}
 
 	res, err := recon.Reconcile(req)

@@ -13,7 +13,8 @@ import (
 type ShellConfig struct {
 	Boot []struct {
 		Command     string            `yaml:"command"`
-		Environment map[string]string `yaml:"environment`
+		Timeout     int               `yaml:"timeout"`
+		Environment map[string]string `yaml:"environment"`
 	} `yaml:"boot"`
 
 	Watch []struct {
@@ -21,7 +22,8 @@ type ShellConfig struct {
 		Kind        string            `yaml:"kind"`
 		Command     string            `yaml:"command"`
 		Concurrency int               `yaml:"concurrency"`
-		Environment map[string]string `yaml:"environment`
+		Timeout     int               `yaml:"timeout"`
+		Environment map[string]string `yaml:"environment"`
 	} `yaml:"watch"`
 }
 

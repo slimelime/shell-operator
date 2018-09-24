@@ -1,6 +1,9 @@
 package watcher
 
 import (
+	"context"
+	"time"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -22,13 +25,16 @@ type ShellReconciler struct {
 	Command          string
 	ObjectKind       string
 	ObjectApiVersion string
+	Timeout          time.Duration
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	glog.V(4).Infof("Received reconcile request for %s/%s.", req.Namespace, req.Name)
 
 	glog.V(4).Infof("Setting up shell command %s for %s/%s...", s.Command, req.Namespace, req.Name)
-	cmd := executor.SetupShellCommand(s.Command, map[string]string{
+	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
+	defer cancel()
+	cmd := executor.SetupShellCommand(ctx, s.Command, map[string]string{
 		NameEnvVarKey:       req.Name,
 		NamespaceEnvVarKey:  req.Namespace,
 		APIVersionEnvVarKey: s.ObjectApiVersion,
@@ -61,6 +67,7 @@ func SetupWatches(mgr manager.Manager, shellConfig *ShellConfig) error {
 					Command:          watch.Command,
 					ObjectApiVersion: watch.ApiVersion,
 					ObjectKind:       watch.Kind,
+					Timeout:          time.Duration(watch.Timeout),
 				},
 			},
 		)
