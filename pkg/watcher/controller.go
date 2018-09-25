@@ -12,12 +12,16 @@ import (
 )
 
 const (
-	NameEnvVarKey      = "SHOP_OBJECT_NAME"
-	NamespaceEnvVarKey = "SHOP_OBJECT_NAMESPACE"
+	NameEnvVarKey       = "SHOP_OBJECT_NAME"
+	NamespaceEnvVarKey  = "SHOP_OBJECT_NAMESPACE"
+	APIVersionEnvVarKey = "SHOP_API_VERSION"
+	KindEnvVarKey       = "SHOP_KIND"
 )
 
 type ShellReconciler struct {
-	Command string
+	Command          string
+	ObjectKind       string
+	ObjectApiVersion string
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
@@ -25,8 +29,10 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 
 	glog.V(4).Infof("Setting up shell command %s for %s/%s...", s.Command, req.Namespace, req.Name)
 	cmd := executor.SetupShellCommand(s.Command, map[string]string{
-		NameEnvVarKey:      req.Name,
-		NamespaceEnvVarKey: req.Namespace,
+		NameEnvVarKey:       req.Name,
+		NamespaceEnvVarKey:  req.Namespace,
+		APIVersionEnvVarKey: s.ObjectApiVersion,
+		KindEnvVarKey:       s.ObjectKind,
 	})
 
 	glog.V(4).Infof("Running command %s...", s.Command)
@@ -52,7 +58,9 @@ func SetupWatches(mgr manager.Manager, shellConfig *ShellConfig) error {
 			controller.Options{
 				MaxConcurrentReconciles: watch.Concurrency,
 				Reconciler: &ShellReconciler{
-					Command: watch.Command,
+					Command:          watch.Command,
+					ObjectApiVersion: watch.ApiVersion,
+					ObjectKind:       watch.Kind,
 				},
 			},
 		)
