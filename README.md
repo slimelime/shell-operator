@@ -61,10 +61,12 @@ watch:
 
 ### CRD input
 
-The operator will expose environment variables into the shell environment when the script is run to allow the script to identify the namespace and name of the object that has changed. The values are:
+The operator will expose environment variables into the shell environment when the script is run to allow the script to identify the namespace and name of the object that has changed as well as the type. The values are:
 
 * SHOP_OBJECT_NAMESPACE
 * SHOP_OBJECT_NAME
+* SHOP_API_VERSION
+* SHOP_KIND
 * Any other variables you have listed in the `environment` key of the YAML config for that watch (see example above).
 
 You can reference these environment variables in your script and use a Kubernetes API call or kubectl to get information on the object that has changed or is being reconciled.
