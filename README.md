@@ -30,6 +30,9 @@ boot:
     # this command is run on boot and is useful for upserting your CRD creation object
     # or any other prep work to be done once when any new pod comes up.
   - command: kubectl apply -f /app/mycrd.yaml
+    # optional key to set how long a process can be running in seconds before it is hard killed. The default is
+    # 30 seconds. This makes sure the app will bootup within a reasonable time, or die of a timeout.
+    timeout: 30
     # Set env vars to be available in the shell
     # This way you can set environment specific items
     # as per a normal 12 factor app
@@ -52,6 +55,10 @@ watch:
     # want to have 10 or more workers
     # This option is here to constrain the operator to the resources you want to use.
     concurrency: 1
+    # optional key to set how long a process can be running in seconds before it is hard killed. The default is
+    # 20 mins. This makes sure the concurrency is not exhausted and deadlocks the controller if processes
+    # start freezing up.
+    timeout: 1200
     # Set env vars to be available in the shell
     # This way you can set environment specific items
     # as per a normal 12 factor app

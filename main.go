@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
-	"os"
+	"time"
 
+	shopconfig "github.com/MYOB-Technology/shell-operator/pkg/config"
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
 
@@ -25,15 +27,10 @@ func main() {
 	flag.Parse()
 
 	glog.V(1).Infof("Loading config from %s...", shellConfigPath)
-	confIn, err := os.Open(shellConfigPath)
+	shellConfig, err := shopconfig.ParseFromFile(shellConfigPath)
+
 	if err != nil {
 		glog.Fatal(err)
-	}
-
-	shellConfig, errs := watcher.ParseAndValidateConfig(confIn)
-
-	if len(errs) > 0 {
-		glog.Fatal(errs)
 	}
 
 	cfg, err := config.GetConfig()
@@ -56,7 +53,9 @@ func main() {
 
 	// Run any boot commands
 	for _, b := range shellConfig.Boot {
-		cmd := executor.SetupShellCommand(b.Command, b.Environment)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(b.Timeout)*time.Second)
+		defer cancel()
+		cmd := executor.SetupShellCommand(ctx, b.Command, b.Environment)
 		glog.V(1).Infof("Executing boot command:")
 		out, err := cmd.CombinedOutput()
 
