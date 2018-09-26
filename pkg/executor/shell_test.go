@@ -32,3 +32,18 @@ func TestRunCommandWithContext(t *testing.T) {
 		t.Error("No context deadline when expected.", ctx.Err())
 	}
 }
+
+func TestSetupAndRunShellCommand(t *testing.T) {
+	ctx := context.Background()
+
+	output, err := SetupAndRunShellCommand(ctx, "echo hello world", map[string]string{"test1": "a"})
+
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	if string(output[:]) != "hello world\n" {
+		t.Error("unexpected output", string(output[:]))
+	}
+}

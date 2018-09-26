@@ -17,3 +17,12 @@ func SetupShellCommand(ctx context.Context, shellCommand string, envVars map[str
 	}
 	return cmd
 }
+
+func SetupAndRunShellCommand(ctx context.Context, shellCommand string, envVars map[string]string) ([]byte, error) {
+	cmd := SetupShellCommand(ctx, shellCommand, envVars)
+	return cmd.CombinedOutput()
+}
+
+func RunCommand(cmd *exec.Cmd) error {
+	return cmd.Run()
+}
