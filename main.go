@@ -4,9 +4,9 @@ import (
 	"context"
 	"flag"
 	"log"
-	"os"
 	"time"
 
+	shopconfig "github.com/MYOB-Technology/shell-operator/pkg/config"
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
 
@@ -27,15 +27,10 @@ func main() {
 	flag.Parse()
 
 	glog.V(1).Infof("Loading config from %s...", shellConfigPath)
-	confIn, err := os.Open(shellConfigPath)
+	shellConfig, err := shopconfig.ParseFromFile(shellConfigPath)
+
 	if err != nil {
 		glog.Fatal(err)
-	}
-
-	shellConfig, errs := watcher.ParseAndValidateConfig(confIn)
-
-	if len(errs) > 0 {
-		glog.Fatal(errs)
 	}
 
 	cfg, err := config.GetConfig()

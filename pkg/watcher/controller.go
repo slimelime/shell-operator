@@ -10,6 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/MYOB-Technology/shell-operator/pkg/config"
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/golang/glog"
 )
@@ -56,7 +57,7 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 // SetupWatches takes the kubebuilder manager and will setup a kubebuilder controller for
 // each watch item in the ShellConfig. It will use the Shell Reconciler to run the fn
 // for every item that comes through.
-func SetupWatches(mgr manager.Manager, shellConfig *ShellConfig) error {
+func SetupWatches(mgr manager.Manager, shellConfig *config.ShellConfig) error {
 	for _, watch := range shellConfig.Watch {
 		glog.V(1).Infof("Setting up watch for %s/%s", watch.ApiVersion, watch.Kind)
 

@@ -17,11 +17,11 @@ services:
 
   sh:
     <<: *base
-    entrypoint: [sh]
+    entrypoint: [bash]
 
   test:
     <<: *base
-    command:
-      - "test"
-      - "./..."
-      - "-v"
+    entrypoint:
+      - go
+      - test
+    command: "./..."
