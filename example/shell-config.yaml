@@ -1,0 +1,8 @@
+---
+boot:
+  - command: kubectl apply -f crds/shop_v1beta1_exampleresource.yaml
+watch:
+  - apiVersion: shop.myob.com/v1beta1
+    kind: ExampleResource
+    command: /app/bin/wrapper
+    concurrency: 5

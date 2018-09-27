@@ -25,3 +25,15 @@ services:
       - go
       - test
     command: "./..."
+
+  shoplocal:
+    <<: *base
+    entrypoint:
+      - go
+      - run
+    command: 
+      - main.go
+      - -v=4
+      - -kubeconfig=/root/.kube/config
+      - -shell-config=./shell-config.yaml
+      - -logtostderr

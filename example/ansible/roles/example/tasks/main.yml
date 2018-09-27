@@ -1,0 +1,7 @@
+---
+
+- include: upsert.yml
+  when: "'resources' in shop_resource"
+
+- include: delete.yml
+  when: "'resources' not in shop_resource"

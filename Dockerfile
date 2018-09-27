@@ -11,6 +11,6 @@ COPY . /go/src/github.com/MYOB-Technology/shell-operator/
 RUN CGO_ENABLED=0 go build -o /shell-operator main.go
 
 FROM scratch
-COPY example/shell-conf.yaml /app/shell-config.yaml
+COPY shell-config.yaml /app/shell-config.yaml
 COPY --from=build /shell-operator /shell-operator
 ENTRYPOINT ["/shell-operator"]

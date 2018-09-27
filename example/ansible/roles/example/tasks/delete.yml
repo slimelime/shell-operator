@@ -1,0 +1,6 @@
+---
+
+- name: delete an example resource
+  debug:
+    msg: "a resource should get deleted now"
+

@@ -1,0 +1,4 @@
+---
+
+- name: debug cluster resource
+  debug: var=shop_resource

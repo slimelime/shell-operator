@@ -1,0 +1,12 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+set -eo pipefail
+
+SHOP_OBJECT_NAME="test-object"
+SHOP_OBJECT_NAMESPACE="default"
+SHOP_API_VERSION="v1beta1"
+SHOP_KIND="test"
+
+export SHOP_OBJECT_NAME SHOP_OBJECT_NAMESPACE SHOP_KIND SHOP_API_VERSION
+
+/app/bin/wrapper

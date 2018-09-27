@@ -1,0 +1,7 @@
+---
+
+- name: upsert an example resource
+  debug:
+    msg: "a resource should get created or updated now"
+  register: result
+

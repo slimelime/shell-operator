@@ -1,0 +1,27 @@
+---
+
+- name: upsert an example resource
+  debug:
+    msg: "a resource should get created or updated now"
+
+- name: debug resources
+  debug:
+    msg: "item.spec is: {{ item.spec }}"
+  with_items: "{{ shop_resource.resources }}"
+  when: shop_resource
+
+- name: update the example resource
+  k8s:
+    state: present
+    definition:
+      apiVersion: "{{ obj_api_version }}"
+      kind: "{{ obj_kind }}"
+      metadata:
+        name: "{{ obj_name }}"
+        namespace: "{{ obj_namespace }}"
+      status:
+        statusfield1: "{{ item.spec.specfield1 }}"
+        statusfield2: "{{ item.spec.specfield2 }}"
+  with_items: "{{ shop_resource.resources }}"
+  when: shop_resource
+

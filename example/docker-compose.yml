@@ -1,0 +1,28 @@
+---
+version: '2.3'
+
+x-base: &base
+  build:
+    context: .
+  working_dir: /app
+  volumes:
+    - ".:/app"
+    - "$HOME/.kube:/root/.kube"
+
+services:
+
+  sh:
+    <<: *base
+    entrypoint: [bash]
+
+  test:
+    <<: *base
+    entrypoint: [/app/bin/test]
+
+  example:
+    <<: *base
+    command: 
+      - -v=4
+      - -kubeconfig=/root/.kube/config
+      - -shell-config=/app/example-config.yaml
+      - -logtostderr

@@ -1,0 +1,15 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+set -eo pipefail
+
+die() { printf '%s\n' "$*" >&2; exit 1; }
+
+pid=$$
+scriptdir=$(dirname $0)
+
+echo "+++ begin wrapper $pid"
+cd ${scriptdir}/../ansible
+[[ -f "${SHOP_KIND}.yml" ]] || die "playbook ${SHOP_KIND}.yml does not exist"
+ansible --version
+ansible-playbook -e apiversion="v1beta1" ${SHOP_KIND}.yml
+echo "+++ end wrapper $pid"

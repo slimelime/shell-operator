@@ -1,0 +1,17 @@
+---
+
+- include: upsert.yml
+  when: "'resources' in shop_resource"
+  register: result
+
+- include: delete.yml
+  when: "'resources' not in shop_resource"
+  register: result
+
+- name: debug test result
+  debug:
+    var: result
+
+- assert:
+    that:
+      - "'a resource should get created or updated now' in result.msg"

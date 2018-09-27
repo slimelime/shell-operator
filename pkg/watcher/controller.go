@@ -57,6 +57,7 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 		if err := scanner.Err(); err != nil {
 			glog.Errorf("%s %s output error: %s", s.ObjectKind, req, err)
 		}
+
 	}
 
 	if err != nil {
