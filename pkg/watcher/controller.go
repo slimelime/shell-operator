@@ -1,6 +1,8 @@
 package watcher
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"time"
 
@@ -30,9 +32,9 @@ type ShellReconciler struct {
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
-	glog.V(4).Infof("Received reconcile request for %s/%s.", req.Namespace, req.Name)
+	glog.V(4).Infof("Received reconcile request for %s", req)
 
-	glog.V(4).Infof("Setting up shell command %s for %s/%s...", s.Command, req.Namespace, req.Name)
+	glog.V(4).Infof("Setting up shell command for %s, %s", s.ObjectKind, req)
 	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 	defer cancel()
 	cmd := executor.SetupShellCommand(ctx, s.Command, map[string]string{
@@ -42,15 +44,27 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 		KindEnvVarKey:       s.ObjectKind,
 	})
 
-	glog.V(4).Infof("Running command %s...", s.Command)
-	_, err := cmd.CombinedOutput()
+	glog.V(4).Infof("Running command for %s %s", s.ObjectKind, req)
+	output, err := cmd.CombinedOutput()
+
+	if len(output) > 0 {
+		reader := bytes.NewReader(output)
+		scanner := bufio.NewScanner(reader)
+		for scanner.Scan() {
+			glog.V(4).Infof("%s %s output: %s", s.ObjectKind, req, scanner.Text())
+		}
+
+		if err := scanner.Err(); err != nil {
+			glog.Errorf("%s %s output error: %s", s.ObjectKind, req, err)
+		}
+	}
 
 	if err != nil {
-		glog.V(4).Infof("Command %s failed: %s.", s.Command, err.Error())
+		glog.V(4).Infof("Command for %s %s failed: %s.", s.ObjectKind, req, err.Error())
 		return reconcile.Result{Requeue: true}, nil
 	}
 
-	glog.V(4).Infof("Command %s successful.", s.Command)
+	glog.V(4).Infof("Command for %s %s successful.", s.ObjectKind, req)
 	return reconcile.Result{Requeue: false}, nil
 }
 
