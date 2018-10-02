@@ -2,7 +2,7 @@
 
 # Kubernetes Shell Operator
 
-This operator is a generic operator that can watch any Kubernetes Object that you specify and will just execute a shell command in a subshell on any change to that Object.
+This operator is a Kubernetes controller framework that can watch any Kubernetes Object that you specify and will just execute a shell command in a subshell on any change to that Object.
 
 The usecase of this operator is for Kubernetes Cluster Administrators to be able to automate any workflow in their cluster based on Kuberenetes Object change events without having to write the Kubernetes watch boilerplate everytime. **It is NOT intended as a way for any Kubernetes user to send an arbitrary shell command into the shell-operator pod.**
 
@@ -15,7 +15,9 @@ The usecase of this operator is for Kubernetes Cluster Administrators to be able
 
 ## How it works
 
-To use this operator you create a new project with a Dockerfile that contains everything you need for your operator use. Just add the Shell Operator Docker image as a separate multistage `FROM` image and copy it into your Dockerfile. See [example/Dockerfile](example/Dockerfile) for an example.
+The shell operator is a binary that you copy into your docker image. You can then copy or install any other depedencies and scripts you want to run for a change to Kubernetes objects. Once your docker image is deployed it will execute the shell operator binary and get the configuration you set to execute your shell scripts whenever the object you specify changes in the Kubernetes API Server.
+
+To use this operator framework you create a new project with a Dockerfile that contains everything you need for your operator to use. Just add the Shell Operator Docker image as a separate multistage `FROM` image and copy it into your Dockerfile. See [example/Dockerfile](example/Dockerfile) for an example.
 
 You can also set your config in a Kubernetes Config Map and volume it in to reduce how often you have to change your docker image.
 
