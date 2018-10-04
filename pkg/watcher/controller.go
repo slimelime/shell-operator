@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/MYOB-Technology/shell-operator/pkg/config"
+	"github.com/MYOB-Technology/shell-operator/pkg/dynamic"
 	"github.com/MYOB-Technology/shell-operator/pkg/executor"
 	"github.com/golang/glog"
 )
@@ -91,7 +92,7 @@ func SetupWatches(mgr manager.Manager, shellConfig *config.ShellConfig) error {
 			return err
 		}
 
-		do, err := CreateAndRegisterWatchObject(mgr.GetScheme(), watch.ApiVersion, watch.Kind)
+		do, err := dynamic.CreateAndRegisterWatchObject(mgr.GetScheme(), watch.ApiVersion, watch.Kind)
 
 		if err != nil {
 			return err
