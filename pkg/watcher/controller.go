@@ -30,13 +30,14 @@ type ShellReconciler struct {
 	ObjectApiVersion string
 	Timeout          time.Duration
 	Environment      map[string]string
+	ctx              context.Context
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	glog.V(4).Infof("Received reconcile request for %s", req)
 
 	glog.V(4).Infof("Setting up shell command for %s, %s", s.ObjectKind, req)
-	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
+	ctx, cancel := context.WithTimeout(s.ctx, s.Timeout*time.Second)
 	defer cancel()
 
 	env := map[string]string{
@@ -65,7 +66,7 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 // SetupWatches takes the kubebuilder manager and will setup a kubebuilder controller for
 // each watch item in the ShellConfig. It will use the Shell Reconciler to run the fn
 // for every item that comes through.
-func SetupWatches(mgr manager.Manager, shellConfig *config.ShellConfig) error {
+func SetupWatches(ctx context.Context, mgr manager.Manager, shellConfig *config.ShellConfig) error {
 	for _, watch := range shellConfig.Watch {
 		glog.V(1).Infof("Setting up watch for %s/%s", watch.ApiVersion, watch.Kind)
 
@@ -78,6 +79,7 @@ func SetupWatches(mgr manager.Manager, shellConfig *config.ShellConfig) error {
 					ObjectKind:       watch.Kind,
 					Timeout:          time.Duration(watch.Timeout),
 					Environment:      watch.Environment,
+					ctx:              ctx,
 				},
 			},
 		)

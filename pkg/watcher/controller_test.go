@@ -1,6 +1,7 @@
 package watcher
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -9,7 +10,11 @@ import (
 )
 
 func TestReconcilerRunsShellCmd(t *testing.T) {
-	recon := ShellReconciler{Command: "bash -c echo $SHOP_OBJECT_NAME $SHOP_OBJECT_NAMESPACE > /tmp/shop-test1", Timeout: time.Duration(1)}
+	recon := ShellReconciler{
+		Command: "bash -c echo $SHOP_OBJECT_NAME $SHOP_OBJECT_NAMESPACE > /tmp/shop-test1",
+		Timeout: time.Duration(1),
+		ctx:     context.Background(),
+	}
 	req := reconcile.Request{types.NamespacedName{Name: "test-object", Namespace: "ns1"}}
 
 	res, err := recon.Reconcile(req)
@@ -24,7 +29,11 @@ func TestReconcilerRunsShellCmd(t *testing.T) {
 }
 
 func TestReconcilerFailedShellCommand(t *testing.T) {
-	recon := ShellReconciler{Command: "exit 1", Timeout: time.Duration(1)}
+	recon := ShellReconciler{
+		Command: "exit 1",
+		Timeout: time.Duration(1),
+		ctx:     context.Background(),
+	}
 	req := reconcile.Request{types.NamespacedName{Name: "test-object", Namespace: "ns1"}}
 
 	res, err := recon.Reconcile(req)
