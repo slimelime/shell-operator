@@ -1,9 +1,8 @@
 package watcher
 
 import (
-	"bufio"
-	"bytes"
 	"context"
+	"os"
 	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -14,7 +13,7 @@ import (
 
 	"github.com/MYOB-Technology/shell-operator/pkg/config"
 	"github.com/MYOB-Technology/shell-operator/pkg/dynamic"
-	"github.com/MYOB-Technology/shell-operator/pkg/executor"
+	"github.com/MYOB-Technology/shell-operator/pkg/shell"
 	"github.com/golang/glog"
 )
 
@@ -30,6 +29,7 @@ type ShellReconciler struct {
 	ObjectKind       string
 	ObjectApiVersion string
 	Timeout          time.Duration
+	Environment      map[string]string
 }
 
 func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
@@ -38,27 +38,20 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 	glog.V(4).Infof("Setting up shell command for %s, %s", s.ObjectKind, req)
 	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 	defer cancel()
-	cmd := executor.SetupShellCommand(ctx, s.Command, map[string]string{
+
+	env := map[string]string{
 		NameEnvVarKey:       req.Name,
 		NamespaceEnvVarKey:  req.Namespace,
 		APIVersionEnvVarKey: s.ObjectApiVersion,
 		KindEnvVarKey:       s.ObjectKind,
-	})
+	}
+
+	cmd := shell.New(ctx, s.Command)
+	shell.AddEnvironment(cmd, env)
+	shell.AddEnvironment(cmd, s.Environment)
 
 	glog.V(4).Infof("Running command for %s %s", s.ObjectKind, req)
-	output, err := cmd.CombinedOutput()
-
-	if len(output) > 0 {
-		reader := bytes.NewReader(output)
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			glog.V(4).Infof("%s %s output: %s", s.ObjectKind, req, scanner.Text())
-		}
-
-		if err := scanner.Err(); err != nil {
-			glog.Errorf("%s %s output error: %s", s.ObjectKind, req, err)
-		}
-	}
+	err := shell.RunWithProgress(cmd, os.Stdout, os.Stderr)
 
 	if err != nil {
 		glog.V(4).Infof("Command for %s %s failed: %s.", s.ObjectKind, req, err.Error())
@@ -84,6 +77,7 @@ func SetupWatches(mgr manager.Manager, shellConfig *config.ShellConfig) error {
 					ObjectApiVersion: watch.ApiVersion,
 					ObjectKind:       watch.Kind,
 					Timeout:          time.Duration(watch.Timeout),
+					Environment:      watch.Environment,
 				},
 			},
 		)
