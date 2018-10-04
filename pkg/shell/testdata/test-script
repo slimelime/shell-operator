@@ -1,5 +1,13 @@
 #! /bin/bash
 
+cleanup() {
+  echo "recieved term"
+  sleep 5
+  echo "exiting after cleanup"
+}
+
+trap cleanup SIGTERM
+
 echo "first line"
 
 >&2 echo "error first line"

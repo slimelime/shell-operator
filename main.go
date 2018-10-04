@@ -46,7 +46,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = watcher.SetupWatches(mgr, shellConfig)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = watcher.SetupWatches(ctx, mgr, shellConfig)
 
 	if err != nil {
 		glog.Fatal(err)
@@ -54,8 +57,7 @@ func main() {
 
 	// Run any boot commands
 	for _, b := range shellConfig.Boot {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(b.Timeout)*time.Second)
-		defer cancel()
+		ctx, bootCancel := context.WithTimeout(ctx, time.Duration(b.Timeout)*time.Second)
 		cmd := shell.New(ctx, b.Command)
 		shell.AddEnvironment(cmd, b.Environment)
 		glog.V(1).Infof("Executing boot command:")
@@ -64,8 +66,16 @@ func main() {
 		if err != nil {
 			glog.Fatal(err)
 		}
+
+		bootCancel()
 	}
 
 	// Start the Cmd
-	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
+	stopCh := signals.SetupSignalHandler()
+	go func() {
+		log.Fatal(mgr.Start(stopCh))
+	}()
+
+	<-stopCh
+	glog.V(4).Infof("Recieved stop.")
 }
