@@ -1,0 +1,8 @@
+#! /bin/bash
+
+echo "first line"
+
+>&2 echo "error first line"
+echo "second line"
+
+>&2 echo "error second line"
