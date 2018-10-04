@@ -4,10 +4,11 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
 	"time"
 
 	shopconfig "github.com/MYOB-Technology/shell-operator/pkg/config"
-	"github.com/MYOB-Technology/shell-operator/pkg/executor"
+	"github.com/MYOB-Technology/shell-operator/pkg/shell"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -55,15 +56,14 @@ func main() {
 	for _, b := range shellConfig.Boot {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(b.Timeout)*time.Second)
 		defer cancel()
-		cmd := executor.SetupShellCommand(ctx, b.Command, b.Environment)
+		cmd := shell.New(ctx, b.Command)
+		shell.AddEnvironment(cmd, b.Environment)
 		glog.V(1).Infof("Executing boot command:")
-		out, err := cmd.CombinedOutput()
+		err := shell.RunWithProgress(cmd, os.Stdout, os.Stderr)
 
 		if err != nil {
 			glog.Fatal(err)
 		}
-
-		glog.V(1).Infof(string(out))
 	}
 
 	// Start the Cmd
