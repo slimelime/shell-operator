@@ -1,5 +1,6 @@
 FROM golang:1.11.0 as base
 RUN go get -u github.com/golang/dep/cmd/dep
+RUN go get github.com/golang/mock/mockgen
 WORKDIR /go/src/github.com/MYOB-Technology/shell-operator
 
 FROM golang:1.11.0 as build
