@@ -8,6 +8,7 @@ import (
 	"time"
 
 	shopconfig "github.com/MYOB-Technology/shell-operator/pkg/config"
+	"github.com/MYOB-Technology/shell-operator/pkg/metrics"
 	"github.com/MYOB-Technology/shell-operator/pkg/shell"
 	"github.com/MYOB-Technology/shell-operator/pkg/watcher"
 
@@ -54,6 +55,8 @@ func main() {
 	if err != nil {
 		glog.Fatal(err)
 	}
+
+	go func() { glog.Fatal(metrics.RunServer("8080")) }()
 
 	// Run any boot commands
 	for _, b := range shellConfig.Boot {
