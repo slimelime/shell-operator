@@ -80,6 +80,14 @@ The operator will expose environment variables into the shell environment when t
 
 You can reference these environment variables in your script and use a Kubernetes API call or kubectl to get information on the object that has changed or is being reconciled.
 
+## Observability
+
+Shell Operator has a metrics endpoint built in that you can point Prometheus at. This will allow you to see how many runs are occuring, which ones are failing and the average time in milliseconds on a per watch basis.
+
+The endpoint is running on port 8080 at `/metrics` with a healthcheck at `/healthz` that you can use for liveness probes.
+
+See [pkg/metrics/metrics.go](pkg/metrics/metrics.go) for the list of available metrics.
+
 ## Development
 
 The repo is enabled with docker and docker-compose. To run tests execute `docker-compose run test`.

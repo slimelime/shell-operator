@@ -14,6 +14,7 @@ import (
 
 	"github.com/MYOB-Technology/shell-operator/pkg/config"
 	"github.com/MYOB-Technology/shell-operator/pkg/dynamic"
+	"github.com/MYOB-Technology/shell-operator/pkg/metrics"
 	"github.com/MYOB-Technology/shell-operator/pkg/shell"
 	"github.com/golang/glog"
 )
@@ -53,13 +54,18 @@ func (s *ShellReconciler) Reconcile(req reconcile.Request) (reconcile.Result, er
 	shell.AddEnvironment(cmd, s.Environment)
 
 	glog.V(4).Infof("Running command for %s %s", s.ObjectKind, req)
+	startTime := time.Now()
 	err := shell.RunWithProgress(cmd, os.Stdout, os.Stderr)
+	runTime := time.Since(startTime)
+	metrics.ObserveRunTime(s.ObjectApiVersion, s.ObjectKind, float64(runTime.Nanoseconds())/float64(time.Millisecond))
 
 	if err != nil {
+		metrics.IncFailureRun(s.ObjectApiVersion, s.ObjectKind)
 		glog.V(4).Infof("Command for %s %s failed: %s.", s.ObjectKind, req, err.Error())
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	metrics.IncSuccessRun(s.ObjectApiVersion, s.ObjectKind)
 	glog.V(4).Infof("Command for %s %s successful.", s.ObjectKind, req)
 	return reconcile.Result{Requeue: false}, nil
 }

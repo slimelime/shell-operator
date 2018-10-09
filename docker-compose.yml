@@ -6,6 +6,8 @@ services:
     build:
       context: .
       target: base
+    ports:
+      - "8080:8080"
     volumes:
       - ".:/go/src/github.com/MYOB-Technology/shell-operator"
       - "$HOME/.kube:/root/.kube"
