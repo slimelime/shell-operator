@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"testing"
 
@@ -16,6 +17,13 @@ func TestNewCommand(t *testing.T) {
 	if cmd.Args[0] != "echo" || cmd.Args[1] != "hello" {
 		t.Error("incorrect args", cmd.Args)
 	}
+}
+
+func TestNewCommandWithEnvironmentVar(t *testing.T) {
+	os.Setenv("FOO", "bar")
+	cmd := shell.New(context.Background(), "echo foo bar")
+
+	failIfEnvVarMissing(t, "FOO", "bar", cmd.Env)
 }
 
 func TestAddingEnvironments(t *testing.T) {

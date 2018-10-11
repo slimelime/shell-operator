@@ -4,13 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 )
 
 func New(ctx context.Context, cmd string) *exec.Cmd {
 	parts := strings.Split(cmd, " ")
-	return exec.CommandContext(ctx, parts[0], parts[1:]...)
+	command := exec.CommandContext(ctx, parts[0], parts[1:]...)
+	command.Env = os.Environ()
+	return command
 }
 
 func AddEnvironment(cmd *exec.Cmd, env map[string]string) *exec.Cmd {
