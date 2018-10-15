@@ -31,9 +31,8 @@ func (d *DeduplicateReconciler) Reconcile(req reconcile.Request) (reconcile.Resu
 
 	if !loaded {
 		res, err = d.inner.Reconcile(req)
+		d.syncMap.Delete(uniq)
 	}
-
-	d.syncMap.Delete(uniq)
 
 	return res, err
 }

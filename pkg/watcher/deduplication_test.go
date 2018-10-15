@@ -5,7 +5,6 @@ package watcher_test
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 
@@ -55,36 +54,44 @@ func TestDeduplicateFiltersMultipleCalls(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	stopCh := make(chan struct{})
+
 	inner := NewMockReconciler(mockCtrl)
 	inner.EXPECT().Reconcile(gomock.Any()).DoAndReturn(func(_ reconcile.Request) (reconcile.Result, error) {
-		time.Sleep(1 * time.Second)
+		<-stopCh
 		return reconcile.Result{}, nil
-	}).Times(2)
+	}).Times(3)
 
 	deduper := watcher.NewDeduplicateReconciler(inner, "prefix")
 
-	go func() {
-		req := reconcile.Request{types.NamespacedName{Name: "test-object1", Namespace: "ns1"}}
-		_, err := deduper.Reconcile(req)
+	for i := 1; i <= 100; i++ {
+		go func() {
+			req := reconcile.Request{types.NamespacedName{Name: "test-object1", Namespace: "ns1"}}
+			_, err := deduper.Reconcile(req)
 
-		if err != nil {
-			t.Error(err)
-		}
-	}()
+			if err != nil {
+				t.Error(err)
+			}
+		}()
 
-	go func() {
-		req := reconcile.Request{types.NamespacedName{Name: "test-object2", Namespace: "ns1"}}
-		_, err := deduper.Reconcile(req)
+		go func() {
+			req := reconcile.Request{types.NamespacedName{Name: "test-object2", Namespace: "ns1"}}
+			_, err := deduper.Reconcile(req)
 
-		if err != nil {
-			t.Error(err)
-		}
-	}()
+			if err != nil {
+				t.Error(err)
+			}
+		}()
 
-	req := reconcile.Request{types.NamespacedName{Name: "test-object1", Namespace: "ns1"}}
-	_, err := deduper.Reconcile(req)
+		go func() {
+			req := reconcile.Request{types.NamespacedName{Name: "test-object1", Namespace: "ns2"}}
+			_, err := deduper.Reconcile(req)
 
-	if err != nil {
-		t.Error(err)
+			if err != nil {
+				t.Error(err)
+			}
+		}()
 	}
+
+	close(stopCh)
 }
