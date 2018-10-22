@@ -2,7 +2,6 @@ package watcher
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -80,14 +79,14 @@ func SetupWatches(ctx context.Context, mgr manager.Manager, shellConfig *config.
 		c, err := controller.New("shell-controller", mgr,
 			controller.Options{
 				MaxConcurrentReconciles: watch.Concurrency,
-				Reconciler: NewDeduplicateReconciler(&ShellReconciler{
+				Reconciler: &ShellReconciler{
 					Command:          watch.Command,
 					ObjectApiVersion: watch.ApiVersion,
 					ObjectKind:       watch.Kind,
 					Timeout:          time.Duration(watch.Timeout),
 					Environment:      watch.Environment,
 					ctx:              ctx,
-				}, fmt.Sprintf("%s-%s", watch.ApiVersion, watch.Kind)),
+				},
 			},
 		)
 
@@ -101,7 +100,7 @@ func SetupWatches(ctx context.Context, mgr manager.Manager, shellConfig *config.
 			return err
 		}
 
-		c.Watch(&source.Kind{Type: do}, &handler.EnqueueRequestForObject{})
+		c.Watch(&SourceDedupeDecorator{source.Kind{Type: do}}, &handler.EnqueueRequestForObject{})
 	}
 
 	return nil
