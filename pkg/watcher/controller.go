@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -76,7 +77,7 @@ func SetupWatches(ctx context.Context, mgr manager.Manager, shellConfig *config.
 	for _, watch := range shellConfig.Watch {
 		glog.V(1).Infof("Setting up watch for %s/%s", watch.ApiVersion, watch.Kind)
 
-		c, err := controller.New("shell-controller", mgr,
+		c, err := controller.New(fmt.Sprintf("%s-%s-controller", watch.ApiVersion, watch.Kind), mgr,
 			controller.Options{
 				MaxConcurrentReconciles: watch.Concurrency,
 				Reconciler: &ShellReconciler{
