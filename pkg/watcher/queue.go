@@ -39,7 +39,7 @@ func (u *UniqKeyQueue) Add(obj interface{}) {
 	u.RateLimitingInterface.Add(obj)
 }
 
-func (u *UniqKeyQueue) Done(obj interface{}) {
+func (u *UniqKeyQueue) Forget(obj interface{}) {
 	u.uniqCond.L.Lock()
 	defer u.uniqCond.L.Unlock()
 
@@ -53,7 +53,7 @@ func (u *UniqKeyQueue) Done(obj interface{}) {
 	uniq := uniqStringFromRequest(req)
 
 	delete(u.currentRunning, uniq)
-	u.RateLimitingInterface.Done(obj)
+	u.RateLimitingInterface.Forget(obj)
 }
 
 func NewUniqKeyQueue(inner workqueue.RateLimitingInterface) *UniqKeyQueue {

@@ -9,28 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func TestRawQueueDedupsOnObjectValue(t *testing.T) {
-	q := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	defer q.ShutDown()
-
-	for i := 1; i <= 100; i++ {
-		q.Add("test")
-	}
-
-	q.Add(2)
-
-	first, _ := q.Get()
-	second, _ := q.Get()
-
-	if first.(string) != "test" {
-		t.Error("first message in queue was", first)
-	}
-
-	if second.(int) != 2 {
-		t.Error("first message was not deduped, got", second)
-	}
-}
-
 func TestUniqKeyQueueDedupsOnObject(t *testing.T) {
 	inner := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
@@ -61,15 +39,11 @@ func TestUniqKeyQueueDedupsOnObject(t *testing.T) {
 		t.FailNow()
 	}
 
-	q.Done(first)
+	q.Forget(first)
+	q.Forget(second)
 
-	q.Add(first)
-
-	first, _ = q.Get()
-
-	if first.(reconcile.Request).Namespace != "a" {
-		t.Error("incorrect first request, the second time", first)
-		t.FailNow()
+	if q.Len() != 0 {
+		t.Error("items in queue when should be empty")
 	}
 }
 
@@ -87,7 +61,11 @@ func TestQueueNormalOperationForNonRequestObj(t *testing.T) {
 		t.Error("number not gotten from queue", myInt)
 	}
 
-	q.Done(myInt)
+	q.Forget(myInt)
+
+	if q.Len() != 0 {
+		t.Error("items in queue when should be empty")
+	}
 }
 
 func newReconcileRequest(namespace, name string) reconcile.Request {
